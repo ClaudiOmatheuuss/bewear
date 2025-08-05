@@ -1,36 +1,143 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# 🛒 E-commerce Full Stack
 
-## Getting Started
+![Status](https://img.shields.io/badge/status-em%20desenvolvimento-yellow)
+![License](https://img.shields.io/badge/license-MIT-blue)
+![Node.js](https://img.shields.io/badge/Node.js-18.x-green)
+![Next.js](https://img.shields.io/badge/Next.js-14-black)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-15-blue)
+![React](https://img.shields.io/badge/React-18-61dafb)
 
-First, run the development server:
+> 🚀 Projeto principal desenvolvido durante o **Bootcamp Full Stack**, com foco em performance, escalabilidade e experiência do usuário.
 
+---
+
+## 📋 Sobre o Projeto
+
+Este é um **e-commerce full stack** desenvolvido para aplicar na prática conceitos avançados de **desenvolvimento web moderno**.  
+O objetivo é criar uma aplicação **completa**, desde o front-end até o back-end, garantindo **boa performance, segurança e SEO**.
+
+A arquitetura foi pensada para oferecer **componentização**, **renderização otimizada** e **integração perfeita** com banco de dados relacional.
+
+---
+
+## ✅ Requisitos Funcionais
+
+- **SEO (Search Engine Optimization)** para melhor ranqueamento nos buscadores.
+- O usuário deve conseguir **fazer login**.
+- O usuário deve conseguir **modificar o carrinho de compras**, incluindo quantidade de produtos.
+- O usuário deve conseguir **finalizar um pedido**, que pode conter:
+  - Um ou mais produtos.
+  - Produtos com diferentes variantes (ex.: cor, tamanho).
+- O usuário deve conseguir **realizar o pagamento** do pedido:
+  - **Cartão de crédito** (integração com gateway de pagamento).
+- O usuário deve conseguir **gerenciar diferentes endereços de entrega**.
+- O usuário deve conseguir **visualizar seus pedidos feitos**.
+- O usuário pode **escolher a categoria dos produtos**.
+
+---
+
+## 🛠 Requisitos Técnicos
+
+As tecnologias foram escolhidas para resolver de forma eficiente os problemas e atender os requisitos funcionais:
+
+- **Node.js** → Ambiente de execução do back-end, rápido e escalável.
+- **React** → Biblioteca para construção do front-end baseada em componentes reutilizáveis.
+- **Next.js** → Framework que permite SSR (Server-Side Rendering) e SSG (Static Site Generation), otimizando SEO e performance, além de integrar front e back na mesma aplicação.
+- **PostgreSQL** → Banco de dados relacional robusto, ideal para lidar com múltiplas relações entre entidades.
+- **Drizzle ORM** → Abstração para trabalhar com PostgreSQL de forma tipada e organizada.
+- **Tailwind CSS** → Framework CSS utilitário para estilização rápida e responsiva.
+- **shadcn/ui** → Biblioteca de componentes acessíveis e estilizados para React/Tailwind.
+- **ESLint + Prettier** → Padronização e formatação de código.
+
+---
+
+## 📂 Estrutura do Projeto
+
+---
+
+.
+├── .vscode/
+├── public/
+├── src/
+│ ├── app/
+│ ├── components/
+│ ├── db/
+│ └── lib/
+├── .gitignore
+├── .prettierrc.json
+├── README.md
+├── components.json
+├── drizzle.config.ts
+├── eslint.config.mjs
+├── next.config.ts
+├── package-lock.json
+├── package.json
+├── postcss.config.mjs
+└── tsconfig.json
+
+## 🚀 Como Rodar o Projeto
+
+---
+
+### 1️⃣ Pré-requisitos
+
+- Node.js >= 18
+- PostgreSQL instalado e rodando
+- npm ou yarn
+
+---
+
+### 2️⃣ Clonar o repositório
+
+````bash
+git clone https://github.com/seuusuario/bewear.git
+cd bewear
+
+---
+### 3️⃣ Instalar dependências
+```bash
+npm install
+
+---
+4️⃣ Configurar variáveis de ambiente
+Copie o arquivo .env.example para .env e configure:
+
+DATABASE_URL=postgresql://usuario:senha@localhost:5432/ecommerce
+---
+### 5️⃣ Rodar migrations e seeds
+```bash
+npm run drizzle:push
+npm run drizzle:seed
+
+---
+### 6️⃣ Iniciar o servidor
 ```bash
 npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Acesse: http://localhost:3000
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+---
+🌱 Seeds Iniciais
+As seeds iniciais populam o banco de dados com:
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+-   **Categorias**: Acessórios, Bermuda & Shorts, Calças, Camisetas, Jaquetas & Moletons, Tênis.
+-   **Produtos**: Com imagens, descrições e preços.
+-   **Variantes**: De cor, tamanho, etc., para os produtos.
+---
 
-## Learn More
+📌 Funcionalidades Futuras
+🔐 Autenticação JWT e integração com OAuth.
 
-To learn more about Next.js, take a look at the following resources:
+🛒 Carrinho persistente.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+💳 Integração com gateway de pagamento real.
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+📦 Rastreamento de pedidos.
 
-## Deploy on Vercel
+📱 Design responsivo completo.
+---
+📄 Licença
+Este projeto está licenciado sob a MIT License.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+---
+````
