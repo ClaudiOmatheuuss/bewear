@@ -1,0 +1,17 @@
+{
+  "eslint.workingDirectories": [
+    {
+      "pattern": "src/**",
+      "model": "auto"
+    }
+  ],
+  "eslint.validate": [
+    "javascript",
+    "typescript",
+    "javascriptreact",
+    "typescriptreact"
+  ],
+  "editor.codeActionsOnSave": {
+    "source.fixAll.eslint": "explicit"
+  }
+}
