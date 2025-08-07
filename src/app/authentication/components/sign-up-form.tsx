@@ -16,7 +16,6 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-import { Label } from "@/components/ui/label";
 import { authClient } from "@/lib/auth-client";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useRouter } from "next/navigation";
@@ -80,7 +79,7 @@ const SignUpForm = () => {
 
   return (
     <>
-      <Card>
+      <Card className="w-full">
         <CardHeader>
           <CardTitle>Criar conta</CardTitle>
           <CardDescription>Crie uma conta para continuar.</CardDescription>
@@ -88,7 +87,7 @@ const SignUpForm = () => {
 
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-8">
-            <CardContent className="grid gap-6">
+            <CardContent className="grid w-full gap-6">
               <FormField
                 control={form.control}
                 name="name"
