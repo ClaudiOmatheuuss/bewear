@@ -1,12 +1,11 @@
 import { relations } from "drizzle-orm";
 import {
+  boolean,
   integer,
-  pgEnum,
   pgTable,
   text,
   timestamp,
   uuid,
-  boolean,
 } from "drizzle-orm/pg-core";
 
 export const userTable = pgTable("user", {
@@ -25,8 +24,12 @@ export const userTable = pgTable("user", {
     .notNull(),
 });
 
-export const userRelations = relations(userTable, ({ many }) => ({
+export const userRelations = relations(userTable, ({ many, one }) => ({
   shippingAddresses: many(shippingAddressTable),
+  cart: one(cartTable, {
+    fields: [userTable.id],
+    references: [cartTable.userId],
+  }),
 }));
 
 export const sessionTable = pgTable("session", {
@@ -58,6 +61,19 @@ export const accountTable = pgTable("account", {
   password: text("password"),
   createdAt: timestamp("created_at").notNull(),
   updatedAt: timestamp("updated_at").notNull(),
+});
+
+export const verificationTable = pgTable("verification", {
+  id: text("id").primaryKey(),
+  identifier: text("identifier").notNull(),
+  value: text("value").notNull(),
+  expiresAt: timestamp("expires_at").notNull(),
+  createdAt: timestamp("created_at").$defaultFn(
+    () => /* @__PURE__ */ new Date(),
+  ),
+  updatedAt: timestamp("updated_at").$defaultFn(
+    () => /* @__PURE__ */ new Date(),
+  ),
 });
 
 export const categoryTable = pgTable("category", {
@@ -112,19 +128,6 @@ export const productVariantRelations = relations(
     }),
   }),
 );
-
-export const verificationTable = pgTable("verification", {
-  id: text("id").primaryKey(),
-  identifier: text("identifier").notNull(),
-  value: text("value").notNull(),
-  expiresAt: timestamp("expires_at").notNull(),
-  createdAt: timestamp("created_at").$defaultFn(
-    () => /* @__PURE__ */ new Date(),
-  ),
-  updatedAt: timestamp("updated_at").$defaultFn(
-    () => /* @__PURE__ */ new Date(),
-  ),
-});
 
 export const shippingAddressTable = pgTable("shipping_address", {
   id: uuid().primaryKey().defaultRandom(),

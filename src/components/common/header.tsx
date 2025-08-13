@@ -1,8 +1,13 @@
 "use client";
 
-import Image from "next/image";
-import { Button } from "../ui/button";
 import { LogInIcon, LogOutIcon, MenuIcon } from "lucide-react";
+import Image from "next/image";
+import Link from "next/link";
+
+import { authClient } from "@/lib/auth-client";
+
+import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
+import { Button } from "../ui/button";
 import {
   Sheet,
   SheetContent,
@@ -10,9 +15,6 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "../ui/sheet";
-import { authClient } from "@/lib/auth-client";
-import { Avatar, AvatarFallback, AvatarImage } from "../ui/avatar";
-import Link from "next/link";
 import { Cart } from "./cart";
 
 export const Header = () => {
@@ -22,10 +24,11 @@ export const Header = () => {
       <Link href="/">
         <Image src="/logo.svg" alt="BEWEAR" width={100} height={26.14} />
       </Link>
+
       <div className="flex items-center gap-3">
         <Sheet>
           <SheetTrigger asChild>
-            <Button variant={"outline"} size={"icon"}>
+            <Button variant="outline" size="icon">
               <MenuIcon />
             </Button>
           </SheetTrigger>
@@ -36,7 +39,7 @@ export const Header = () => {
             <div className="px-5">
               {session?.user ? (
                 <>
-                  <div className="flex justify-between">
+                  <div className="flex justify-between space-y-6">
                     <div className="flex items-center gap-3">
                       <Avatar>
                         <AvatarImage
@@ -56,8 +59,8 @@ export const Header = () => {
                       </div>
                     </div>
                     <Button
-                      variant={"outline"}
-                      size={"icon"}
+                      variant="outline"
+                      size="icon"
                       onClick={() => authClient.signOut()}
                     >
                       <LogOutIcon />
@@ -67,7 +70,7 @@ export const Header = () => {
               ) : (
                 <div className="flex items-center justify-between">
                   <h2 className="font-semibold">Olá. Faça seu login!</h2>
-                  <Button size={"icon"} asChild variant={"outline"}>
+                  <Button size="icon" asChild variant="outline">
                     <Link href="/authentication">
                       <LogInIcon />
                     </Link>
