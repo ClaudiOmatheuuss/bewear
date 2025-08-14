@@ -46,6 +46,7 @@ export const Cart = () => {
                     id={item.id}
                     productName={item.productVariant.product.name}
                     productVariantName={item.productVariant.name}
+                    productVariantId={item.productVariant.id}
                     productVariantImageUrl={item.productVariant.imageUrl}
                     productVariantPriceInCents={
                       item.productVariant.priceInCents
