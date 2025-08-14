@@ -13,6 +13,18 @@
 
 ## 📋 Sobre o Projeto
 
+**Tecnologias e ferramentas utilizadas:**
+
+- Next.js 15 (App Router)
+- TypeScript
+- Tailwind CSS
+- shadcn/ui
+- React Hook Form para formulários
+- Zod para validações
+- BetterAuth para autenticação
+- PostgreSQL como banco de dados
+- Drizzle como ORM
+
 Este é um **e-commerce full stack** desenvolvido para aplicar na prática conceitos avançados de **desenvolvimento web moderno**.  
 O objetivo é criar uma aplicação **completa**, desde o front-end até o back-end, garantindo **boa performance, segurança e SEO**.
 
@@ -126,13 +138,8 @@ As seeds iniciais populam o banco de dados com:
 ---
 
 📌 Funcionalidades Futuras
-🔐 Autenticação JWT e integração com OAuth.
-
-🛒 Carrinho persistente.
 
 💳 Integração com gateway de pagamento real.
-
-📦 Rastreamento de pedidos.
 
 📱 Design responsivo completo.
 ---
