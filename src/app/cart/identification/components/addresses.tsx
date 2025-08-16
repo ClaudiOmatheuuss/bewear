@@ -20,44 +20,90 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
+import { useCreateShippingAddress } from "@/hooks/mutations/use-create-shipping-address";
+import { toast } from "sonner";
+
 const formSchema = z.object({
-  email: z.email("E-mail inválido"),
-  fullName: z.string().min(1, "Nome completo é obrigatório"),
-  cpf: z.string().min(14, "CPF inválido"),
-  phone: z.string().min(15, "Celular inválido"),
-  zipCode: z.string().min(9, "CEP inválido"),
-  address: z.string().min(1, "Endereço é obrigatório"),
-  number: z.string().min(1, "Número é obrigatório"),
+  email: z.string().email("E-mail inválido"),
+  recipientName: z.string().min(1, "Nome completo é obrigatório"),
+  cpfOrCnpj: z.string().min(11, "CPF/CNPJ inválido"),
+  phone: z.string().min(14, "Telefone inválido"),
+  zipCode: z.string().min(8, "CEP inválido"),
+  street: z.string().min(1, "Endereço é obrigatório"),
+  number: z
+    .string()
+    .min(1, "Número é obrigatório")
+    .regex(/^\d+$/, "Número deve conter apenas dígitos"),
   complement: z.string().optional(),
   neighborhood: z.string().min(1, "Bairro é obrigatório"),
   city: z.string().min(1, "Cidade é obrigatória"),
   state: z.string().min(1, "Estado é obrigatório"),
+  country: z.string().min(1, "País é obrigatório"),
 });
 
 type FormValues = z.infer<typeof formSchema>;
 
+const estadosBrasileiros = [
+  "AC",
+  "AL",
+  "AP",
+  "AM",
+  "BA",
+  "CE",
+  "DF",
+  "ES",
+  "GO",
+  "MA",
+  "MT",
+  "MS",
+  "MG",
+  "PA",
+  "PB",
+  "PR",
+  "PE",
+  "PI",
+  "RJ",
+  "RN",
+  "RS",
+  "RO",
+  "RR",
+  "SC",
+  "SP",
+  "SE",
+  "TO",
+];
+
 const Addresses = () => {
   const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
+  const createShippingAddressMutation = useCreateShippingAddress();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
       email: "",
-      fullName: "",
-      cpf: "",
+      recipientName: "",
+      cpfOrCnpj: "",
       phone: "",
       zipCode: "",
-      address: "",
+      street: "",
       number: "",
       complement: "",
       neighborhood: "",
       city: "",
       state: "",
+      country: "Brasil",
     },
   });
 
-  const onSubmit = (values: FormValues) => {
-    console.log(values);
+  const onSubmit = async (values: FormValues) => {
+    try {
+      await createShippingAddressMutation.mutateAsync(values);
+      toast.success("Endereço criado com sucesso!");
+      form.reset();
+      setSelectedAddress(null);
+    } catch (error) {
+      toast.error("Erro ao criar endereço. Tente novamente.");
+    }
   };
 
   return (
@@ -100,7 +146,7 @@ const Addresses = () => {
 
                 <FormField
                   control={form.control}
-                  name="fullName"
+                  name="recipientName"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Nome completo</FormLabel>
@@ -117,10 +163,10 @@ const Addresses = () => {
 
                 <FormField
                   control={form.control}
-                  name="cpf"
+                  name="cpfOrCnpj"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>CPF</FormLabel>
+                      <FormLabel>CPF/CNPJ</FormLabel>
                       <FormControl>
                         <PatternFormat
                           format="###.###.###-##"
@@ -174,7 +220,7 @@ const Addresses = () => {
 
                 <FormField
                   control={form.control}
-                  name="address"
+                  name="street"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Endereço</FormLabel>
@@ -193,7 +239,12 @@ const Addresses = () => {
                     <FormItem>
                       <FormLabel>Número</FormLabel>
                       <FormControl>
-                        <Input placeholder="Digite o número" {...field} />
+                        <PatternFormat
+                          format="####"
+                          placeholder="Digite o número"
+                          customInput={Input}
+                          {...field}
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -252,7 +303,36 @@ const Addresses = () => {
                     <FormItem>
                       <FormLabel>Estado</FormLabel>
                       <FormControl>
-                        <Input placeholder="Digite o estado" {...field} />
+                        <select
+                          {...field}
+                          className="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                        >
+                          <option value="">Selecione o estado</option>
+                          {estadosBrasileiros.map((estado) => (
+                            <option key={estado} value={estado}>
+                              {estado}
+                            </option>
+                          ))}
+                        </select>
+                      </FormControl>
+                      <FormMessage />
+                    </FormItem>
+                  )}
+                />
+
+                <FormField
+                  control={form.control}
+                  name="country"
+                  render={({ field }) => (
+                    <FormItem>
+                      <FormLabel>País</FormLabel>
+                      <FormControl>
+                        <Input
+                          placeholder="Brasil"
+                          {...field}
+                          value="Brasil"
+                          readOnly
+                        />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
@@ -260,8 +340,14 @@ const Addresses = () => {
                 />
               </div>
 
-              <Button type="submit" className="w-full">
-                Salvar endereço
+              <Button
+                type="submit"
+                className="w-full"
+                disabled={createShippingAddressMutation.isPending}
+              >
+                {createShippingAddressMutation.isPending
+                  ? "Salvando..."
+                  : "Salvar endereço"}
               </Button>
             </form>
           </Form>
