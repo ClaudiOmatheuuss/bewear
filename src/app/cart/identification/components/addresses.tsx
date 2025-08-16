@@ -21,7 +21,24 @@ import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 import { useCreateShippingAddress } from "@/hooks/mutations/use-create-shipping-address";
+import { useShippingAddresses } from "@/hooks/queries/use-shipping-addresses";
 import { toast } from "sonner";
+
+type ShippingAddress = {
+  id: string;
+  recipientName: string;
+  street: string;
+  number: string;
+  complement?: string;
+  neighborhood: string;
+  city: string;
+  state: string;
+  country: string;
+  phone: string;
+  email: string;
+  cpfOrCnpj: string;
+  createdAt: Date | string;
+};
 
 const formSchema = z.object({
   email: z.string().email("E-mail inválido"),
@@ -76,6 +93,7 @@ const estadosBrasileiros = [
 const Addresses = () => {
   const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
   const createShippingAddressMutation = useCreateShippingAddress();
+  const { data: addressesData, isLoading, error } = useShippingAddresses();
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -106,6 +124,18 @@ const Addresses = () => {
     }
   };
 
+  const formatAddress = (address: ShippingAddress) => {
+    const parts = [
+      address.recipientName,
+      `${address.street}, ${address.number}`,
+      address.complement,
+      address.neighborhood,
+      `${address.city} - ${address.state}`,
+    ].filter(Boolean);
+
+    return parts.join(", ");
+  };
+
   return (
     <Card>
       <CardHeader>
@@ -113,11 +143,79 @@ const Addresses = () => {
       </CardHeader>
       <CardContent>
         <RadioGroup value={selectedAddress} onValueChange={setSelectedAddress}>
+          {isLoading && (
+            <Card className="mb-3">
+              <CardContent className="pt-4">
+                <div className="flex items-center space-x-2">
+                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600"></div>
+                  <Label className="text-muted-foreground text-sm">
+                    Carregando endereços...
+                  </Label>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {!isLoading && error && (
+            <Card className="mb-3 border-red-200 bg-red-50">
+              <CardContent className="pt-4">
+                <div className="flex items-center space-x-2">
+                  <Label className="text-sm text-red-600">
+                    Erro ao carregar endereços. Tente novamente.
+                  </Label>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {!isLoading &&
+            addressesData?.success &&
+            addressesData.data &&
+            addressesData.data.length > 0 && (
+              <>
+                {addressesData.data.map((address) => (
+                  <Card key={address.id} className="mb-3">
+                    <CardContent>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value={address.id} id={address.id} />
+                        <Label htmlFor={address.id} className="cursor-pointer">
+                          <div>
+                            <p className="text-sm">
+                              {address.recipientName} - {address.street},{" "}
+                              {address.number}
+                              {address.complement &&
+                                `, ${address.complement}`},{" "}
+                              {address.neighborhood}, {address.city} -{" "}
+                              {address.state} CEP: {address.zipCode}
+                            </p>
+                          </div>
+                        </Label>
+                      </div>
+                    </CardContent>
+                  </Card>
+                ))}
+              </>
+            )}
+
+          {!isLoading &&
+            addressesData?.success &&
+            (!addressesData.data || addressesData.data.length === 0) && (
+              <Card className="mb-3">
+                <CardContent className="pt-4">
+                  <div className="flex items-center space-x-2">
+                    <Label className="text-muted-foreground text-sm">
+                      Nenhum endereço cadastrado
+                    </Label>
+                  </div>
+                </CardContent>
+              </Card>
+            )}
+
           <Card>
-            <CardContent>
+            <CardContent className="cursor-pointer">
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="add_new" id="add_new" />
-                <Label htmlFor="add_new">Adicionar novo endereço</Label>
+                <Label htmlFor="add_new">Adicionar novo</Label>
               </div>
             </CardContent>
           </Card>
@@ -239,12 +337,7 @@ const Addresses = () => {
                     <FormItem>
                       <FormLabel>Número</FormLabel>
                       <FormControl>
-                        <PatternFormat
-                          format="####"
-                          placeholder="Digite o número"
-                          customInput={Input}
-                          {...field}
-                        />
+                        <Input placeholder="Digite o número" {...field} />
                       </FormControl>
                       <FormMessage />
                     </FormItem>
