@@ -4,6 +4,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
 import { useForm } from "react-hook-form";
 import { PatternFormat } from "react-number-format";
+import { toast } from "sonner";
 import z from "zod";
 
 import { Button } from "@/components/ui/button";
@@ -19,38 +20,21 @@ import {
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
-
+import { shippingAddressTable } from "@/db/schema";
 import { useCreateShippingAddress } from "@/hooks/mutations/use-create-shipping-address";
-import { useShippingAddresses } from "@/hooks/queries/use-shipping-addresses";
-import { toast } from "sonner";
-
-type ShippingAddress = {
-  id: string;
-  recipientName: string;
-  street: string;
-  number: string;
-  complement?: string;
-  neighborhood: string;
-  city: string;
-  state: string;
-  country: string;
-  phone: string;
-  email: string;
-  cpfOrCnpj: string;
-  createdAt: Date | string;
-};
+import { useUserAddresses } from "@/hooks/queries/use-shipping-addresses";
 
 const formSchema = z.object({
   email: z.string().email("E-mail inválido"),
   recipientName: z.string().min(1, "Nome completo é obrigatório"),
-  cpfOrCnpj: z.string().min(11, "CPF/CNPJ inválido"),
-  phone: z.string().min(14, "Telefone inválido"),
-  zipCode: z.string().min(8, "CEP inválido"),
-  street: z.string().min(1, "Endereço é obrigatório"),
-  number: z
+  cpfOrCnpj: z
     .string()
-    .min(1, "Número é obrigatório")
-    .regex(/^\d+$/, "Número deve conter apenas dígitos"),
+    .min(11, "CPF/CNPJ inválido")
+    .max(18, "CPF/CNPJ inválido"),
+  phone: z.string().min(14, "Telefone inválido").max(15, "Telefone inválido"),
+  zipCode: z.string().min(8, "CEP inválido").max(9, "CEP inválido"),
+  street: z.string().min(1, "Endereço é obrigatório"),
+  number: z.string().min(1, "Número é obrigatório"),
   complement: z.string().optional(),
   neighborhood: z.string().min(1, "Bairro é obrigatório"),
   city: z.string().min(1, "Cidade é obrigatória"),
@@ -90,10 +74,16 @@ const estadosBrasileiros = [
   "TO",
 ];
 
-const Addresses = () => {
+interface AddressesProps {
+  shippingAddresses: (typeof shippingAddressTable.$inferSelect)[];
+}
+
+const Addresses = ({ shippingAddresses }: AddressesProps) => {
   const [selectedAddress, setSelectedAddress] = useState<string | null>(null);
   const createShippingAddressMutation = useCreateShippingAddress();
-  const { data: addressesData, isLoading, error } = useShippingAddresses();
+  const { data: addresses, isLoading } = useUserAddresses({
+    initialData: shippingAddresses,
+  });
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -115,25 +105,15 @@ const Addresses = () => {
 
   const onSubmit = async (values: FormValues) => {
     try {
-      await createShippingAddressMutation.mutateAsync(values);
+      const newAddress =
+        await createShippingAddressMutation.mutateAsync(values);
       toast.success("Endereço criado com sucesso!");
       form.reset();
-      setSelectedAddress(null);
+      setSelectedAddress(newAddress.id);
     } catch (error) {
       toast.error("Erro ao criar endereço. Tente novamente.");
+      console.error(error);
     }
-  };
-
-  const formatAddress = (address: ShippingAddress) => {
-    const parts = [
-      address.recipientName,
-      `${address.street}, ${address.number}`,
-      address.complement,
-      address.neighborhood,
-      `${address.city} - ${address.state}`,
-    ].filter(Boolean);
-
-    return parts.join(", ");
   };
 
   return (
@@ -142,84 +122,57 @@ const Addresses = () => {
         <CardTitle>Identificação</CardTitle>
       </CardHeader>
       <CardContent>
-        <RadioGroup value={selectedAddress} onValueChange={setSelectedAddress}>
-          {isLoading && (
-            <Card className="mb-3">
-              <CardContent className="pt-4">
-                <div className="flex items-center space-x-2">
-                  <div className="h-4 w-4 animate-spin rounded-full border-2 border-gray-300 border-t-gray-600"></div>
-                  <Label className="text-muted-foreground text-sm">
-                    Carregando endereços...
-                  </Label>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {!isLoading && error && (
-            <Card className="mb-3 border-red-200 bg-red-50">
-              <CardContent className="pt-4">
-                <div className="flex items-center space-x-2">
-                  <Label className="text-sm text-red-600">
-                    Erro ao carregar endereços. Tente novamente.
-                  </Label>
-                </div>
-              </CardContent>
-            </Card>
-          )}
-
-          {!isLoading &&
-            addressesData?.success &&
-            addressesData.data &&
-            addressesData.data.length > 0 && (
-              <>
-                {addressesData.data.map((address) => (
-                  <Card key={address.id} className="mb-3">
-                    <CardContent>
-                      <div className="flex items-center space-x-2">
-                        <RadioGroupItem value={address.id} id={address.id} />
-                        <Label htmlFor={address.id} className="cursor-pointer">
-                          <div>
-                            <p className="text-sm">
-                              {address.recipientName} - {address.street},{" "}
-                              {address.number}
-                              {address.complement &&
-                                `, ${address.complement}`},{" "}
-                              {address.neighborhood}, {address.city} -{" "}
-                              {address.state} CEP: {address.zipCode}
-                            </p>
-                          </div>
-                        </Label>
-                      </div>
-                    </CardContent>
-                  </Card>
-                ))}
-              </>
+        {isLoading ? (
+          <div className="py-4 text-center">
+            <p>Carregando endereços...</p>
+          </div>
+        ) : (
+          <RadioGroup
+            value={selectedAddress}
+            onValueChange={setSelectedAddress}
+          >
+            {addresses?.data?.length === 0 && (
+              <div className="py-4 text-center">
+                <p className="text-muted-foreground">
+                  Você ainda não possui endereços cadastrados.
+                </p>
+              </div>
             )}
 
-          {!isLoading &&
-            addressesData?.success &&
-            (!addressesData.data || addressesData.data.length === 0) && (
-              <Card className="mb-3">
-                <CardContent className="pt-4">
-                  <div className="flex items-center space-x-2">
-                    <Label className="text-muted-foreground text-sm">
-                      Nenhum endereço cadastrado
-                    </Label>
+            {addresses?.data?.map((address) => (
+              <Card key={address.id}>
+                <CardContent>
+                  <div className="flex items-start space-x-2">
+                    <RadioGroupItem value={address.id} id={address.id} />
+                    <div className="flex-1">
+                      <Label htmlFor={address.id} className="cursor-pointer">
+                        <div>
+                          <p className="text-sm">
+                            {address.recipientName} • {address.street},{" "}
+                            {address.number}
+                            {address.complement &&
+                              `, ${address.complement}`}, {address.neighborhood}
+                            , {address.city} - {address.state} • CEP:{" "}
+                            {address.zipCode}
+                          </p>
+                        </div>
+                      </Label>
+                    </div>
                   </div>
                 </CardContent>
               </Card>
-            )}
+            ))}
 
-          <Card>
-            <CardContent className="cursor-pointer">
-              <div className="flex items-center space-x-2">
-                <RadioGroupItem value="add_new" id="add_new" />
-                <Label htmlFor="add_new">Adicionar novo</Label>
-              </div>
-            </CardContent>
-          </Card>
-        </RadioGroup>
+            <Card>
+              <CardContent>
+                <div className="flex items-center space-x-2">
+                  <RadioGroupItem value="add_new" id="add_new" />
+                  <Label htmlFor="add_new">Adicionar novo endereço</Label>
+                </div>
+              </CardContent>
+            </Card>
+          </RadioGroup>
+        )}
 
         {selectedAddress === "add_new" && (
           <Form {...form}>
@@ -283,7 +236,7 @@ const Addresses = () => {
                   name="phone"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Celular</FormLabel>
+                      <FormLabel>Telefone</FormLabel>
                       <FormControl>
                         <PatternFormat
                           format="(##) #####-####"
@@ -397,10 +350,10 @@ const Addresses = () => {
                       <FormLabel>Estado</FormLabel>
                       <FormControl>
                         <select
-                          {...field}
                           className="border-input bg-background ring-offset-background placeholder:text-muted-foreground focus-visible:ring-ring flex h-10 w-full rounded-md border px-3 py-2 text-sm file:border-0 file:bg-transparent file:text-sm file:font-medium focus-visible:ring-2 focus-visible:ring-offset-2 focus-visible:outline-none disabled:cursor-not-allowed disabled:opacity-50"
+                          {...field}
                         >
-                          <option value="">Selecione o estado</option>
+                          <option value="">Selecione um estado</option>
                           {estadosBrasileiros.map((estado) => (
                             <option key={estado} value={estado}>
                               {estado}
