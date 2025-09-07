@@ -1,6 +1,6 @@
 import { betterAuth } from "better-auth";
 import { drizzleAdapter } from "better-auth/adapters/drizzle";
-import { getDb } from "@/db";
+import { db } from "@/db";
 import * as schema from "@/db/schema";
 
 export const auth = betterAuth({
@@ -13,10 +13,12 @@ export const auth = betterAuth({
       clientSecret: process.env.GOOGLE_CLIENT_SECRET as string,
     },
   },
-  database: drizzleAdapter(getDb(), {
-    provider: "pg",
-    schema,
-  }),
+  database: db
+    ? drizzleAdapter(db, {
+        provider: "pg",
+        schema,
+      })
+    : undefined,
   user: {
     modelName: "userTable",
   },
