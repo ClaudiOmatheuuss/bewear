@@ -2,7 +2,7 @@ import CategorySelector from "@/components/common/category-selector";
 import Footer from "@/components/common/footer";
 import { Header } from "@/components/common/header";
 import ProductList from "@/components/common/product-list";
-import { db } from "@/db";
+import { getDb } from "@/db";
 import { productTable } from "@/db/schema";
 import { desc } from "drizzle-orm";
 import Image from "next/image";
@@ -57,28 +57,26 @@ const Home = async () => {
     createdAt: Date;
   }> = [];
 
-  if (db) {
-    try {
-      products = await db.query.productTable.findMany({
-        with: {
-          variants: true,
-          category: true,
-        },
-      });
+  try {
+    const db = getDb();
+    products = await db.query.productTable.findMany({
+      with: {
+        variants: true,
+        category: true,
+      },
+    });
 
-      newlyCreatedProducts = await db.query.productTable.findMany({
-        orderBy: [desc(productTable.createdAt)],
-        with: {
-          variants: true,
-        },
-        limit: 4,
-      });
+    newlyCreatedProducts = await db.query.productTable.findMany({
+      orderBy: [desc(productTable.createdAt)],
+      with: {
+        variants: true,
+      },
+      limit: 4,
+    });
 
-      categories = await db.query.categoryTable.findMany({});
-    } catch (error) {
-      console.error("Database query error:", error);
-    }
-  } else {
+    categories = await db.query.categoryTable.findMany({});
+  } catch (error) {
+    console.error("Database query error:", error);
     console.warn("Database not available, using empty data");
   }
 

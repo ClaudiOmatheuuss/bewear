@@ -5,7 +5,7 @@ import { notFound } from "next/navigation";
 import Footer from "@/components/common/footer";
 import { Header } from "@/components/common/header";
 import ProductList from "@/components/common/product-list";
-import { db } from "@/db";
+import { getDb } from "@/db";
 import { productTable, productVariantTable } from "@/db/schema";
 import { formatCentsToBRL } from "@/helpers/money";
 
@@ -19,12 +19,8 @@ interface ProductVariantPageProps {
 const ProductVariantPage = async ({ params }: ProductVariantPageProps) => {
   const { slug } = await params;
 
-  if (!db) {
-    console.warn("Database not available");
-    return notFound();
-  }
-
   try {
+    const db = getDb();
     const productVariant = await db.query.productVariantTable.findFirst({
       where: eq(productVariantTable.slug, slug),
       with: {

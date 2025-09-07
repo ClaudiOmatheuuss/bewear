@@ -1,7 +1,16 @@
 import crypto from "crypto";
 
 import { getDb } from ".";
-import { categoryTable, productTable, productVariantTable } from "./schema";
+import {
+  categoryTable,
+  productTable,
+  productVariantTable,
+  orderItemTable,
+  orderTable,
+  cartItemTable,
+  cartTable,
+  shippingAddressTable,
+} from "./schema";
 
 const productImages = {
   Mochila: {
@@ -541,8 +550,13 @@ async function main() {
 
   try {
     const db = getDb();
-    // Limpar dados existentes
+    // Limpar dados existentes (na ordem correta para respeitar foreign keys)
     console.log("🧹 Limpando dados existentes...");
+    await db.delete(orderItemTable);
+    await db.delete(orderTable);
+    await db.delete(cartItemTable);
+    await db.delete(cartTable);
+    await db.delete(shippingAddressTable);
     await db.delete(productVariantTable);
     await db.delete(productTable);
     await db.delete(categoryTable);

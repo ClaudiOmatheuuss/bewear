@@ -1,6 +1,6 @@
 import { Header } from "@/components/common/header";
 import ProductItem from "@/components/common/product-item";
-import { db } from "@/db";
+import { getDb } from "@/db";
 import { categoryTable, productTable } from "@/db/schema";
 import { eq } from "drizzle-orm";
 import { notFound } from "next/navigation";
@@ -12,12 +12,8 @@ interface CategoryPageProps {
 const CategoryPage = async ({ params }: CategoryPageProps) => {
   const { slug } = await params;
 
-  if (!db) {
-    console.warn("Database not available");
-    return notFound();
-  }
-
   try {
+    const db = getDb();
     const category = await db.query.categoryTable.findFirst({
       where: eq(categoryTable.slug, slug),
     });
