@@ -19,6 +19,11 @@ interface ProductVariantPageProps {
 const ProductVariantPage = async ({ params }: ProductVariantPageProps) => {
   const { slug } = await params;
 
+  if (!db) {
+    console.warn("Database not available");
+    return notFound();
+  }
+
   try {
     const productVariant = await db.query.productVariantTable.findFirst({
       where: eq(productVariantTable.slug, slug),
@@ -90,7 +95,7 @@ const ProductVariantPage = async ({ params }: ProductVariantPageProps) => {
       </>
     );
   } catch (error) {
-    console.error("Database connection error:", error);
+    console.error("Database query error:", error);
     return notFound();
   }
 };

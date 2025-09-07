@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 import { revalidatePath } from "next/cache";
 import { headers } from "next/headers";
 
-import { db } from "@/db";
+import { getDb } from "@/db";
 import {
   cartItemTable,
   cartTable,
@@ -20,6 +20,7 @@ export const finishOrder = async () => {
   if (!session) {
     throw new Error("Unauthorized");
   }
+  const db = getDb();
 
   const cart = await db.query.cartTable.findFirst({
     where: eq(cartTable.userId, session.user.id),

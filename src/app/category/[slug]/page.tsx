@@ -12,6 +12,11 @@ interface CategoryPageProps {
 const CategoryPage = async ({ params }: CategoryPageProps) => {
   const { slug } = await params;
 
+  if (!db) {
+    console.warn("Database not available");
+    return notFound();
+  }
+
   try {
     const category = await db.query.categoryTable.findFirst({
       where: eq(categoryTable.slug, slug),
@@ -46,7 +51,7 @@ const CategoryPage = async ({ params }: CategoryPageProps) => {
       </>
     );
   } catch (error) {
-    console.error("Database connection error:", error);
+    console.error("Database query error:", error);
     return notFound();
   }
 };

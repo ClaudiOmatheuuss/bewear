@@ -2,7 +2,7 @@
 
 import { headers } from "next/headers";
 
-import { db } from "@/db";
+import { getDb } from "@/db";
 import { shippingAddressTable } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { revalidatePath } from "next/cache";
@@ -24,6 +24,8 @@ export const createShippingAddress = async (
   if (!session?.user) {
     throw new Error("Unauthorized");
   }
+
+  const db = getDb();
 
   const [newAddress] = await db
     .insert(shippingAddressTable)

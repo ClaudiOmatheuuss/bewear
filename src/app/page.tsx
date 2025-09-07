@@ -57,25 +57,29 @@ const Home = async () => {
     createdAt: Date;
   }> = [];
 
-  try {
-    products = await db.query.productTable.findMany({
-      with: {
-        variants: true,
-        category: true,
-      },
-    });
+  if (db) {
+    try {
+      products = await db.query.productTable.findMany({
+        with: {
+          variants: true,
+          category: true,
+        },
+      });
 
-    newlyCreatedProducts = await db.query.productTable.findMany({
-      orderBy: [desc(productTable.createdAt)],
-      with: {
-        variants: true,
-      },
-      limit: 4,
-    });
+      newlyCreatedProducts = await db.query.productTable.findMany({
+        orderBy: [desc(productTable.createdAt)],
+        with: {
+          variants: true,
+        },
+        limit: 4,
+      });
 
-    categories = await db.query.categoryTable.findMany({});
-  } catch (error) {
-    console.error("Database connection error:", error);
+      categories = await db.query.categoryTable.findMany({});
+    } catch (error) {
+      console.error("Database query error:", error);
+    }
+  } else {
+    console.warn("Database not available, using empty data");
   }
 
   return (

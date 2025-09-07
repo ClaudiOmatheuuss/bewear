@@ -2,7 +2,7 @@
 
 import { headers } from "next/headers";
 
-import { db } from "@/db";
+import { getDb } from "@/db";
 import { shippingAddressTable } from "@/db/schema";
 import { auth } from "@/lib/auth";
 import { eq } from "drizzle-orm";
@@ -16,6 +16,8 @@ export async function getShippingAddresses() {
     if (!session?.user?.id) {
       throw new Error("Usuário não autenticado");
     }
+
+    const db = getDb();
 
     const addresses = await db
       .select()

@@ -3,7 +3,7 @@
 import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 
-import { db } from "@/db";
+import { getDb } from "@/db";
 import { cartTable } from "@/db/schema";
 import { auth } from "@/lib/auth";
 
@@ -24,6 +24,8 @@ export const updateCartShippingAddress = async (
   if (!session?.user) {
     throw new Error("Unauthorized");
   }
+
+  const db = getDb();
 
   const shippingAddress = await db.query.shippingAddressTable.findFirst({
     where: (shippingAddress, { eq, and }) =>

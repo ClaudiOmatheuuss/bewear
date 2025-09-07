@@ -2,7 +2,7 @@
 
 import { headers } from "next/headers";
 
-import { db } from "@/db";
+import { getDb } from "@/db";
 import { cartTable } from "@/db/schema";
 import { auth } from "@/lib/auth";
 
@@ -13,6 +13,7 @@ export const getCart = async () => {
   if (!session?.user) {
     throw new Error("Unauthorized");
   }
+  const db = getDb();
   const cart = await db.query.cartTable.findFirst({
     where: (cart, { eq }) => eq(cart.userId, session.user.id),
     with: {

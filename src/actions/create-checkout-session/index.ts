@@ -4,7 +4,7 @@ import { eq } from "drizzle-orm";
 import { headers } from "next/headers";
 import Stripe from "stripe";
 
-import { db } from "@/db";
+import { getDb } from "@/db";
 import {
   cartItemTable,
   cartTable,
@@ -30,6 +30,7 @@ export const createCheckoutSession = async (
   if (!session?.user) {
     throw new Error("Unauthorized");
   }
+  const db = getDb();
   const { orderId } = createCheckoutSessionSchema.parse(data);
   const order = await db.query.orderTable.findFirst({
     where: eq(orderTable.id, orderId),
