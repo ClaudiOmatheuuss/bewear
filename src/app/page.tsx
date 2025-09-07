@@ -8,21 +8,76 @@ import { desc } from "drizzle-orm";
 import Image from "next/image";
 
 const Home = async () => {
-  const products = await db.query.productTable.findMany({
-    with: {
-      variants: true,
-      category: true,
-    },
-  });
+  let products: Array<{
+    id: string;
+    categoryId: string;
+    name: string;
+    slug: string;
+    description: string;
+    createdAt: Date;
+    variants: Array<{
+      id: string;
+      productId: string;
+      name: string;
+      slug: string;
+      color: string;
+      priceInCents: number;
+      imageUrl: string;
+      createdAt: Date;
+    }>;
+    category: {
+      id: string;
+      name: string;
+      slug: string;
+      createdAt: Date;
+    };
+  }> = [];
+  let newlyCreatedProducts: Array<{
+    id: string;
+    categoryId: string;
+    name: string;
+    slug: string;
+    description: string;
+    createdAt: Date;
+    variants: Array<{
+      id: string;
+      productId: string;
+      name: string;
+      slug: string;
+      color: string;
+      priceInCents: number;
+      imageUrl: string;
+      createdAt: Date;
+    }>;
+  }> = [];
+  let categories: Array<{
+    id: string;
+    name: string;
+    slug: string;
+    createdAt: Date;
+  }> = [];
 
-  const newlyCreatedProducts = await db.query.productTable.findMany({
-    orderBy: [desc(productTable.createdAt)],
-    with: {
-      variants: true,
-    },
-    limit: 4,
-  });
-  const categories = await db.query.categoryTable.findMany({});
+  try {
+    products = await db.query.productTable.findMany({
+      with: {
+        variants: true,
+        category: true,
+      },
+    });
+
+    newlyCreatedProducts = await db.query.productTable.findMany({
+      orderBy: [desc(productTable.createdAt)],
+      with: {
+        variants: true,
+      },
+      limit: 4,
+    });
+
+    categories = await db.query.categoryTable.findMany({});
+  } catch (error) {
+    console.error("Database connection error:", error);
+  }
+
   return (
     <>
       <Header />
