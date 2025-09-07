@@ -1,6 +1,6 @@
 import crypto from "crypto";
 
-import { db } from ".";
+import { getDb } from ".";
 import { categoryTable, productTable, productVariantTable } from "./schema";
 
 const productImages = {
@@ -540,6 +540,7 @@ async function main() {
   console.log("🌱 Iniciando o seeding do banco de dados...");
 
   try {
+    const db = getDb();
     // Limpar dados existentes
     console.log("🧹 Limpando dados existentes...");
     await db.delete(productVariantTable);

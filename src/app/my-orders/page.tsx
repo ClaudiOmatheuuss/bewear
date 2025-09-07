@@ -3,7 +3,7 @@ import { headers } from "next/headers";
 import { redirect } from "next/navigation";
 
 import { Header } from "@/components/common/header";
-import { db } from "@/db";
+import { getDb } from "@/db";
 import { orderTable } from "@/db/schema";
 import { auth } from "@/lib/auth";
 
@@ -16,6 +16,7 @@ const MyOrdersPage = async () => {
   if (!session?.user.id) {
     redirect("/login");
   }
+  const db = getDb();
   const orders = await db.query.orderTable.findMany({
     where: eq(orderTable.userId, session?.user.id),
     with: {
